@@ -9,6 +9,8 @@
 #include "DIMotor.h"
 #include "StepMotor.h"
 #include "UART.h"
+#include "imu_I2C.h"
+#include "imu660rc.h"
 #include "ti_msp_dl_config.h"
 #include "Encoder.h"
 
@@ -18,7 +20,7 @@ QueueHandle_t Motor_DI2_Queue;
 static void prvSetupHardware(void);
 volatile uint8_t init_done = 0;
 
-extern uint32_t* count1_la,count2_la;
+extern uint32_t* count1_las,*count2_las;
 
 int main(void)
 {
@@ -55,13 +57,7 @@ int main(void)
                 NULL);
 
 
- /*   xTaskCreate(Sensor_Task,
-                "Sensor",
-                256,
-                NULL,
-                1,
-                NULL);
-*/
+
 
     // 启动FreeRTOS
     vTaskStartScheduler();
@@ -79,6 +75,8 @@ int main(void)
 static void prvSetupHardware(void)
 {
     SYSCFG_DL_init();
+    imu660rc_i2c_init();
+    GROUP1_NVIC_init();
     PWM_Set_DI_L(0);
     PWM_Set_DI_R(0);
     PWM_Set_Step_L(0);

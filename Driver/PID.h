@@ -28,7 +28,11 @@ typedef struct
     
 }State_t;
 
-void PID_Cal(PID_t *pid,State_t *state,float Speed);
+void PID_Init(PID_t speed_pid,PID_t yaw_pid);
+void PID_Speed_Cal(PID_t *pid,State_t *state,float Speed);
+float Yaw_Error(float target, float current);
+void PID_Yaw_Cal(PID_t *pid, State_t *state, float Yaw, float Gyro_Z);
+
 
 #endif
 

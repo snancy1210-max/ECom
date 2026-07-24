@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "Encoder.h"
 #include <stdint.h>
+#include "imu660rc.h"
 #include "ti_msp_dl_config.h"
 
 
@@ -43,11 +44,11 @@ void GROUP1_IRQHandler(void)
 
     status = DL_GPIO_getEnabledInterruptStatus(                       //获取引脚掩码，后面清除标志位可直接使用
         GPIOA,
-        DL_GPIO_PIN_12|DL_GPIO_PIN_13                       
+        DL_GPIO_PIN_12|DL_GPIO_PIN_13|DL_GPIO_PIN_0                       
     );
 
 
-    if(status)
+    if((status&DL_GPIO_PIN_12)||(status&DL_GPIO_PIN_13))
     {
 
         uint8_t current;
@@ -89,11 +90,26 @@ void GROUP1_IRQHandler(void)
 
 
         last_AB_state = current;
+      
+    }
 
+    if (status & DL_GPIO_PIN_0) {
 
+        imu660rc_int2_callback();   // 读四元数
 
-        DL_GPIO_clearInterruptStatus(GPIOA,status);     //status是触发中断的引脚掩码
     }
 
 
+    DL_GPIO_clearInterruptStatus(GPIOA,status);     //status是触发中断的引脚掩码
+}
+
+void GROUP1_NVIC_init(void)
+{
+    NVIC_ClearPendingIRQ(GPIOA_INT_IRQn);  // 或 GPIOA_INT_IRQn
+    NVIC_EnableIRQ(GPIOA_INT_IRQn);
+    NVIC_SetPriority(GPIOA_INT_IRQn, 3);
+
+    NVIC_ClearPendingIRQ(GPIOB_INT_IRQn);  // 或 GPIOA_INT_IRQn
+    NVIC_EnableIRQ(GPIOB_INT_IRQn);
+    NVIC_SetPriority(GPIOB_INT_IRQn, 3);
 }

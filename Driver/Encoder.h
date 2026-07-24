@@ -6,6 +6,7 @@ volatile int32_t encoder_count;
 uint8_t Encoder_Read_AB(void);
 int32_t Encoder_Get(void);
 void GROUP1_IRQHandler(void);
+void GROUP1_NVIC_init(void);
 
 extern volatile int32_t encoder_count;
 extern uint8_t last_AB_state;
