@@ -6,23 +6,23 @@
 #include "ti_msp_dl_config.h"
 
 
-void PID_Init(PID_t speed_pid,PID_t yaw_pid)
+void PID_Init(PID_t *speed_pid,PID_t *yaw_pid)
 {
     // 速度环
-    speed_pid.kp = 2.0f;        // 起步误差 50 ticks 时，输出约 100 PWM
-    speed_pid.ki = 0.1f;
-    speed_pid.kd = 0.0f;
-    speed_pid.IntegralK = 0.5f;
-    speed_pid.alpha = 0.3f;
-    speed_pid.MaxOutput = 1000;
+    speed_pid->kp = 2.0f;        // 起步误差 50 ticks 时，输出约 100 PWM
+    speed_pid->ki = 0.1f;
+    speed_pid->kd = 0.0f;
+    speed_pid->IntegralK = 0.5f;
+    speed_pid->alpha = 0.3f;
+    speed_pid->MaxOutput = 1000;
     
     // 航向环
-    yaw_pid.kp = 3.0f;          // 从 1~5 开始试
-    yaw_pid.ki = 0.0f;          // 航向环一般不加 I，容易绕圈
-    yaw_pid.kd = 0.5f;          // 用陀螺仪做 D，抑制摇头
-    yaw_pid.IntegralK = 1.0f;   // 反正 ki=0，无所谓
-    yaw_pid.alpha = 1.0f;       // Yaw 如果已滤波，不再二次滤波
-    yaw_pid.MaxOutput = 300;    // 差速限制！调这个控制转弯灵敏度
+    yaw_pid->kp = 3.0f;          // 从 1~5 开始试
+    yaw_pid->ki = 0.0f;          // 航向环一般不加 I，容易绕圈
+    yaw_pid->kd = 0.5f;          // 用陀螺仪做 D，抑制摇头
+    yaw_pid->IntegralK = 1.0f;   // 反正 ki=0，无所谓
+    yaw_pid->alpha = 1.0f;       // Yaw 如果已滤波，不再二次滤波
+    yaw_pid->MaxOutput = 300;    // 差速限制！调这个控制转弯灵敏度
 }
 
 
@@ -72,7 +72,7 @@ float Yaw_Error(float target, float current)       //航向角
 }
 
 
-void PID_Yaw_Cal(PID_t *pid, State_t *state, float Yaw, float Gyro_Z)
+void PID_Yaw_Cal(PID_t *pid, State_t *state, float Yaw, float Gyro_Z)  //Yaw为current
 {
     float err = Yaw_Error(state->Target, Yaw);
     
@@ -94,4 +94,17 @@ void PID_Yaw_Cal(PID_t *pid, State_t *state, float Yaw, float Gyro_Z)
     
     
     state->error_last = err;
+}
+
+float Line_PD(LinePD_t *pd,float error)
+{
+    float out;
+
+    out =
+        pd->kp * error
+      + pd->kd * (error - pd->last_error);
+
+    pd->last_error = error;
+
+    return out;
 }

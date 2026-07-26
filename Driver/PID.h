@@ -1,7 +1,16 @@
 #ifndef PID_H
 #define PID_H
 
-typedef struct
+typedef struct     //循迹误差纠正
+{
+    float kp;
+    float kd;
+
+    float last_error;
+
+}LinePD_t;
+
+typedef struct    //速度角度修正
 {
     float kp;
     float ki;
@@ -28,11 +37,11 @@ typedef struct
     
 }State_t;
 
-void PID_Init(PID_t speed_pid,PID_t yaw_pid);
+void PID_Init(PID_t* speed_pid,PID_t* yaw_pid);
 void PID_Speed_Cal(PID_t *pid,State_t *state,float Speed);
 float Yaw_Error(float target, float current);
 void PID_Yaw_Cal(PID_t *pid, State_t *state, float Yaw, float Gyro_Z);
-
+float Line_PD(LinePD_t *pd,float error);
 
 #endif
 

@@ -14,55 +14,65 @@
 #include "ti_msp_dl_config.h"
 #include "Encoder.h"
 
+#include "SEGGER_RTT.h"
+
+
 QueueHandle_t Motor_DI_Queue;
 QueueHandle_t Motor_DI2_Queue;
  
 static void prvSetupHardware(void);
 volatile uint8_t init_done = 0;
 
-extern uint32_t* count1_las,*count2_las;
 
 int main(void)
 {
-    
+     
+
     prvSetupHardware();
+
+    SEGGER_RTT_Init();
+    SEGGER_RTT_printf(0, "[MAIN] Boot OK\r\n");
+
 
 
     Motor_DI_Queue = xQueueCreate(10,sizeof(State_t));
     Motor_DI2_Queue = xQueueCreate(10,sizeof(State_t));
 
 
+  BaseType_t ret;
 
-
-     xTaskCreate(Uart_Task,
+   /*  xTaskCreate(Uart_Task,
                 "UART",
                 256,
+                NULL,
+                1,
+                NULL);
+*/
+     ret = 
+    xTaskCreate(DI_Motor_Task,
+                "Motor",
+                512,
                 NULL,
                 2,
                 NULL);
 
+SEGGER_RTT_printf(0, "[MAIN] UART create=%d\r\n", ret);
 
-    xTaskCreate(DI_Motor_Task,
-                "Motor",
-                256,
-                NULL,
-                1,
-                NULL);
-
+ret =
     xTaskCreate(Step_Motor_Task,
                 "Motor",
-                256,
+                512,
                 NULL,
                 1,
                 NULL);
 
-
+SEGGER_RTT_printf(0, "[MAIN] UART create=%d\r\n", ret);
 
 
     // 启动FreeRTOS
     vTaskStartScheduler();
 
-
+SEGGER_RTT_printf(0, "[MAIN] Scheduler returned!\r\n");  
     while(1);
 
 
@@ -79,12 +89,10 @@ static void prvSetupHardware(void)
     GROUP1_NVIC_init();
     PWM_Set_DI_L(0);
     PWM_Set_DI_R(0);
-    PWM_Set_Step_L(0);
-    PWM_Set_Step_R(0);
+   // PWM_Set_Step_L(0);
+   // PWM_Set_Step_R(0);
     last_AB_state = Encoder_Read_AB();
 
-    count1_la = 0;
-    count2_la = 0;
 
     init_done = 1;
 }

@@ -16,7 +16,7 @@ void Step_Motor_Task(void *pvParameters)
 
     while (1) {
     
+     vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    vTaskDelay(pdMS_TO_TICKS(10));
 }
